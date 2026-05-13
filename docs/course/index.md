@@ -1,54 +1,64 @@
 # 实战项目：用 AI Agent + 飞书构建一门完整课程
 
-> **保姆级教程** — 从注册飞书应用到课程上线，每一步都有代码和说明。
-> 你将学到如何用 Claude Code + [feishu-kit](https://github.com/HustWolfzzb/feishu-kit) 在飞书知识库里构建一门完整的课程。
+> **保姆级教程** — 即使你从来没调过飞书 API，也能跟着一步步做出来。
+
+## 这个教程是干什么的
+
+你将亲手完成一件事：**在飞书知识库里构建一门完整的在线课程**。
+
+我们不手动在飞书里一个一个创建文档——那太慢了。而是用 Python 脚本 + AI 辅助来自动化完成整个过程。你不需要是 Python 高手，只要能跟着复制粘贴、运行命令就行。
 
 ## 你将构建什么
 
-一门名为「具身智能导论」的完整飞书知识库课程，包含：
+完成后，你的飞书知识库里会有这样一棵树：
 
 ```
 具身智能导论（知识空间）
 ├── 绪论
-│   ├── 1.1 具身智能的概念与内涵
-│   ├── 1.2 发展背景与研究意义
-│   ├── 1.3 与机器人、人工智能的关系
-│   ├── 1.4 具身智能操作系统
-│   ├── 1.5 学习目标与学习方法
-│   └── 1.6 教材整体结构说明
+│   ├── 1.1 具身智能的概念与内涵     ← 每个小节都有完整文档内容
+│   ├── 1.2 发展背景与研究意义       ← 每个小节下还挂着配套 PPT
+│   ├── ...
 ├── 第二章 感知基础
 │   └── ...
 └── ...
 ```
 
-每个章节不仅有文档内容，还有配套的 PPT 课件作为子文档。
-
 ## 我们用什么工具
 
-| 工具 | 作用 | 为什么选它 |
-|------|------|-----------|
-| [feishu-kit](https://github.com/HustWolfzzb/feishu-kit) | 飞书 API Python 封装 | 异步优先、模块化、零框架绑定 |
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | AI 辅助编程 | 生成内容块、审查质量、自动化脚本 |
-| python-pptx | PPT 生成 | 纯 Python，无需 Office |
-| 飞书知识库 | 课程托管 | 在线协作、权限管理、版本历史 |
+不用被下面这些名词吓到，每一章我都会手把手教你安装和使用。
 
-!!! tip "关于 feishu-kit"
-    feishu-kit 是本教程配套的开源项目，提供了 7 个飞书 API 模块（Wiki、Drive、Messaging、Contacts、Calendar、Task、md2feishu）、CLI 工具和可选的 FastAPI 服务器层。本教程中用到的所有 API 调用都来自 feishu-kit。
+| 工具 | 一句话解释 | 在教程中的作用 |
+|------|-----------|--------------|
+| Python | 编程语言 | 写脚本调用飞书 API |
+| [feishu-kit](https://github.com/HustWolfzzb/feishu-kit) | 飞书 API 的 Python 封装库 | 让你不用自己写 HTTP 请求，几行代码就能操作飞书 |
+| 飞书开放平台 | 飞书给开发者提供的接口 | 让你的脚本能操作飞书知识库 |
+| Claude Code | AI 编程助手 | 帮你生成课程内容（可选，但强烈推荐） |
+| python-pptx | PPT 生成库 | 用代码自动生成课件 |
+
+!!! tip "完全零基础？"
+    如果你不熟悉 Python，也不用担心。本教程的每个代码块都有详细注释，你只需要：
+    1. 把代码复制到 `.py` 文件里
+    2. 把 `cli_xxx` 替换成你自己的飞书凭证
+    3. 运行 `python 文件名.py`
+
+    如果你想系统学习 Python，推荐先花 2 小时过一遍 [Python 官方教程](https://docs.python.org/zh-cn/3/tutorial/) 的前 5 章。
 
 ## 课程章节
 
-| 章节 | 内容 |
-|------|------|
-| [Ch1: 环境准备](ch01-setup.md) | Python 环境、飞书应用创建、权限配置、feishu-kit 安装与验证 |
-| [Ch2: 创建文档骨架](ch02-outline.md) | 知识空间创建、WikiService 批量创建章节/小节节点 |
-| [Ch3: AI 填充内容](ch03-fill-content.md) | 飞书块模型、块构建工具、Claude 辅助生成、批量填充 |
-| [Ch4: 内容审查](ch04-review.md) | CLI 查看内容、AI 辅助审查、去 AI 味、增量更新 |
-| [Ch5: PPT 课件](ch05-ppt.md) | python-pptx 生成、DriveService 上传、移入知识库 |
-| [Ch6: 学术引用](ch06-enrich.md) | 引用搜索、Md2FeishuService 快速推送、数据表格 |
-| [Ch7: 工作流与 FAQ](ch07-workflow.md) | 全流程回顾、异常体系、FAQ、进阶方向 |
+每一章都建立在前一章的基础上，建议按顺序阅读。
+
+| 章节 | 你将学会 | 预计时间 |
+|------|---------|---------|
+| [Ch1: 环境准备](ch01-setup.md) | 安装工具、注册飞书应用、验证连接 | 15 分钟 |
+| [Ch2: 创建文档骨架](ch02-outline.md) | 用脚本在飞书知识库中批量创建章节 | 10 分钟 |
+| [Ch3: AI 填充内容](ch03-fill-content.md) | 理解飞书文档结构、用 AI 生成课程内容 | 30 分钟 |
+| [Ch4: 内容审查](ch04-review.md) | 检查和修正已写入的内容 | 15 分钟 |
+| [Ch5: PPT 课件](ch05-ppt.md) | 自动生成课件并上传到飞书 | 15 分钟 |
+| [Ch6: 学术引用](ch06-enrich.md) | 为课程补充学术引用和产业数据 | 15 分钟 |
+| [Ch7: 工作流与 FAQ](ch07-workflow.md) | 全流程回顾、常见问题解答 | 10 分钟 |
 
 ## 前置要求
 
-- Python 3.11+
-- 一个飞书开放平台应用（免费注册）
-- Claude Code（可选，用于 AI 辅助）
+- Python 3.11+（不知道版本？在终端输入 `python --version` 查看）
+- 一个飞书账号（企业版或个人版都可以，免费）
+- 一个终端（Mac 用 Terminal，Windows 用 PowerShell 或 WSL）
