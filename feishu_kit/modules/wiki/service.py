@@ -6,6 +6,7 @@ members, and RAG-oriented retrieval.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from typing import Any
 
@@ -81,9 +82,7 @@ class WikiService:
             params["page_token"] = page_token
         if parent_node_token:
             params["parent_node_token"] = parent_node_token
-        return await self._client.request(
-            "GET", f"/wiki/v2/spaces/{space_id}/nodes", params=params
-        )
+        return await self._client.request("GET", f"/wiki/v2/spaces/{space_id}/nodes", params=params)
 
     async def get_node(self, token: str) -> dict[str, Any]:
         """Get node information by token.
@@ -110,9 +109,7 @@ class WikiService:
         all_nodes: list[dict[str, Any]] = []
         page_token: str | None = None
         while True:
-            result = await self.list_nodes(
-                space_id, page_size=50, page_token=page_token
-            )
+            result = await self.list_nodes(space_id, page_size=50, page_token=page_token)
             all_nodes.extend(result.get("data", {}).get("items", []))
             if not result.get("data", {}).get("has_more"):
                 break
@@ -144,9 +141,7 @@ class WikiService:
             else:
                 by_parent.setdefault(parent, []).append(n)
 
-        def _build(
-            nodes: list[dict[str, Any]], depth: int
-        ) -> list[dict[str, Any]]:
+        def _build(nodes: list[dict[str, Any]], depth: int) -> list[dict[str, Any]]:
             if depth >= max_depth:
                 return nodes
             result: list[dict[str, Any]] = []
@@ -193,9 +188,7 @@ class WikiService:
         Returns:
             Raw API response dict.
         """
-        return await self._client.request(
-            "GET", f"/docx/v1/documents/{obj_token}/raw_content"
-        )
+        return await self._client.request("GET", f"/docx/v1/documents/{obj_token}/raw_content")
 
     async def get_doc_blocks(
         self,
@@ -324,9 +317,7 @@ class WikiService:
         }
         if parent_node_token:
             body["parent_node_token"] = parent_node_token
-        return await self._client.request(
-            "POST", f"/wiki/v2/spaces/{space_id}/nodes", json=body
-        )
+        return await self._client.request("POST", f"/wiki/v2/spaces/{space_id}/nodes", json=body)
 
     async def move_node(
         self,
@@ -538,10 +529,8 @@ class WikiService:
         Returns:
             Raw API response dict from the add operation.
         """
-        try:
+        with contextlib.suppress(Exception):
             await self.delete_space_member(space_id, member_type, member_id)
-        except Exception:
-            pass
         return await self.add_space_member(space_id, member_type, member_id, member_role)
 
     async def delete_space_member(
@@ -604,13 +593,15 @@ class WikiService:
                 except Exception as e:
                     logger.warning("Failed to get content for %s: %s", obj_token, e)
 
-            results.append({
-                "node_token": node_token,
-                "title": title,
-                "obj_token": obj_token,
-                "content": content,
-                "blocks_summary": blocks_count,
-            })
+            results.append(
+                {
+                    "node_token": node_token,
+                    "title": title,
+                    "obj_token": obj_token,
+                    "content": content,
+                    "blocks_summary": blocks_count,
+                }
+            )
 
         return results
 
@@ -668,10 +659,7 @@ class WikiService:
         """
         all_nodes = await self.list_all_nodes(space_id)
         keyword_lower = keyword.lower()
-        matches = [
-            n for n in all_nodes
-            if keyword_lower in n.get("title", "").lower()
-        ]
+        matches = [n for n in all_nodes if keyword_lower in n.get("title", "").lower()]
         return matches
 
     async def delete_block(

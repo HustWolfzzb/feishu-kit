@@ -1,0 +1,100 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in feishu-kit.
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the sections below to help us diagnose the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what went wrong.
+      placeholder: "When I call ... the library returns ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Tell us exactly how to trigger the bug.
+      placeholder: |
+        1. Install feishu-kit version X.Y.Z
+        2. Create a FeishuClient with ...
+        3. Call wiki.create_document(...)
+        4. Observe the error
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include full error tracebacks if available.
+      render: python-traceback
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: The Python version you are using.
+      placeholder: "e.g. 3.12.3"
+    validations:
+      required: true
+
+  - type: input
+    id: feishu-kit-version
+    attributes:
+      label: feishu-kit Version
+      description: The version of feishu-kit you have installed.
+      placeholder: "e.g. 0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: feishu-api-endpoint
+    attributes:
+      label: Feishu API Endpoint
+      description: The specific Feishu Open API endpoint involved (if applicable).
+      placeholder: "e.g. /open-apis/docx/v1/documents"
+
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal Reproducer
+      description: |
+        A self-contained code snippet that demonstrates the issue.
+        Keep it as short as possible — remove any app_id, app_secret, or other secrets.
+      render: python
+      placeholder: |
+        import asyncio
+        from feishu_kit.core.client import FeishuClient
+
+        async def main():
+            client = FeishuClient(...)
+            result = await client.get("/open-apis/...")
+            print(result)
+
+        asyncio.run(main())
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, logs, screenshots, or environment details.

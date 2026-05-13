@@ -3,13 +3,12 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.calendar import CalendarService
 from server.base import BaseModule
 
-
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -44,8 +43,11 @@ def create_calendar_router(service: CalendarService) -> APIRouter:
 
     @router.get("/calendars/{calendar_id}/events")
     async def list_events(
-        calendar_id: str, start_time: str = "", end_time: str = "",
-        page_size: int = 20, page_token: str | None = None,
+        calendar_id: str,
+        start_time: str = "",
+        end_time: str = "",
+        page_size: int = 20,
+        page_token: str | None = None,
     ):
         try:
             return await service.list_events(
@@ -88,7 +90,9 @@ def create_calendar_router(service: CalendarService) -> APIRouter:
     async def freebusy(body: dict[str, Any]):
         try:
             return await service.freebusy(
-                body.get("user_id", ""), body["start_time"], body["end_time"],
+                body.get("user_id", ""),
+                body["start_time"],
+                body["end_time"],
             )
         except Exception as e:
             _handle(e)
@@ -97,6 +101,7 @@ def create_calendar_router(service: CalendarService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class CalendarModule(BaseModule):
     @property

@@ -3,20 +3,21 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.wiki import WikiService
+from pydantic import BaseModel
 from server.base import BaseModule
 
-
 # ── Request models ──────────────────────────────────────────
+
 
 class RenameBody(BaseModel):
     title: str
 
+
 class MoveBody(BaseModel):
     target_parent_token: str
+
 
 class CreateBlockBody(BaseModel):
     children: list[dict[str, Any]]
@@ -24,6 +25,7 @@ class CreateBlockBody(BaseModel):
 
 
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -118,8 +120,11 @@ def create_wiki_router(service: WikiService) -> APIRouter:
     async def add_doc_permission(obj_token: str, body: dict[str, Any]):
         try:
             return await service.add_doc_member(
-                obj_token, body["member_type"], body["member_id"],
-                body["perm"], body.get("obj_type", "docx"),
+                obj_token,
+                body["member_type"],
+                body["member_id"],
+                body["perm"],
+                body.get("obj_type", "docx"),
             )
         except Exception as e:
             _handle(e)
@@ -129,8 +134,10 @@ def create_wiki_router(service: WikiService) -> APIRouter:
     async def create_node(space_id: str, body: dict[str, Any]):
         try:
             return await service.create_node(
-                space_id, body.get("obj_type", "docx"),
-                body.get("title", "未命名文档"), body.get("parent_node_token"),
+                space_id,
+                body.get("obj_type", "docx"),
+                body.get("title", "未命名文档"),
+                body.get("parent_node_token"),
             )
         except Exception as e:
             _handle(e)
@@ -153,8 +160,10 @@ def create_wiki_router(service: WikiService) -> APIRouter:
     async def move_docs_to_wiki(space_id: str, body: dict[str, Any]):
         try:
             return await service.move_docs_to_wiki(
-                space_id, body["parent_wiki_token"],
-                body["obj_token"], body.get("obj_type", "doc"),
+                space_id,
+                body["parent_wiki_token"],
+                body["obj_token"],
+                body.get("obj_type", "doc"),
             )
         except Exception as e:
             _handle(e)
@@ -186,7 +195,9 @@ def create_wiki_router(service: WikiService) -> APIRouter:
     async def add_space_member(space_id: str, body: dict[str, Any]):
         try:
             return await service.add_space_member(
-                space_id, body["member_type"], body["member_id"],
+                space_id,
+                body["member_type"],
+                body["member_id"],
                 body.get("member_role", "member"),
             )
         except Exception as e:
@@ -196,7 +207,10 @@ def create_wiki_router(service: WikiService) -> APIRouter:
     async def update_space_member(space_id: str, body: dict[str, Any]):
         try:
             return await service.update_space_member(
-                space_id, body["member_type"], body["member_id"], body["member_role"],
+                space_id,
+                body["member_type"],
+                body["member_id"],
+                body["member_role"],
             )
         except Exception as e:
             _handle(e)
@@ -205,7 +219,10 @@ def create_wiki_router(service: WikiService) -> APIRouter:
     async def delete_space_member(space_id: str, member_id: str, body: dict[str, Any]):
         try:
             return await service.delete_space_member(
-                space_id, body["member_type"], member_id, body.get("member_role", "member"),
+                space_id,
+                body["member_type"],
+                member_id,
+                body.get("member_role", "member"),
             )
         except Exception as e:
             _handle(e)
@@ -241,7 +258,10 @@ def create_wiki_router(service: WikiService) -> APIRouter:
         try:
             b = body or {}
             return await service.delete_block(
-                obj_token, block_id, b.get("start_index", 0), b.get("end_index", 0),
+                obj_token,
+                block_id,
+                b.get("start_index", 0),
+                b.get("end_index", 0),
             )
         except Exception as e:
             _handle(e)
@@ -257,6 +277,7 @@ def create_wiki_router(service: WikiService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class WikiModule(BaseModule):
     @property

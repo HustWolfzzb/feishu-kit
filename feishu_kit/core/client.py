@@ -1,14 +1,19 @@
 """Feishu Open API HTTP client with automatic token management."""
 
+from __future__ import annotations
+
 import asyncio
-import time
 import logging
+import time
 
 import httpx
+
+from feishu_kit.core.exceptions import APIError, AuthenticationError, RateLimitError
 
 logger = logging.getLogger(__name__)
 
 FEISHU_BASE_URL = "https://open.feishu.cn/open-apis"
+MAX_RETRIES = 3
 
 
 class FeishuClient:
@@ -20,12 +25,11 @@ class FeishuClient:
 
     Example::
 
-        client = FeishuClient(app_id="cli_xxx", app_secret="xxx")
-        result = await client.request("GET", "/wiki/v2/spaces")
-        await client.close()
+        async with FeishuClient(app_id="cli_xxx", app_secret="xxx") as client:
+            result = await client.request("GET", "/wiki/v2/spaces")
     """
 
-    def __init__(self, app_id: str, app_secret: str):
+    def __init__(self, app_id: str, app_secret: str) -> None:
         if not app_id or not app_secret:
             raise ValueError("app_id and app_secret are required")
         self._app_id = app_id
@@ -34,6 +38,16 @@ class FeishuClient:
         self._token_expires_at: float = 0
         self._token_lock = asyncio.Lock()
         self._client: httpx.AsyncClient | None = None
+
+    def __repr__(self) -> str:
+        masked = self._app_id[:6] + "..." if len(self._app_id) > 6 else "***"
+        return f"FeishuClient(app_id={masked!r})"
+
+    async def __aenter__(self) -> FeishuClient:
+        return self
+
+    async def __aexit__(self, *exc: object) -> None:
+        await self.close()
 
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create the persistent async HTTP client with connection pooling."""
@@ -69,11 +83,11 @@ class FeishuClient:
             )
 
             if resp.status_code >= 400:
-                raise RuntimeError(f"Token request failed: HTTP {resp.status_code}")
+                raise AuthenticationError(f"Token request failed: HTTP {resp.status_code}")
 
             data = resp.json()
             if data.get("code") != 0:
-                raise RuntimeError(f"Failed to get token: {data.get('msg')}")
+                raise AuthenticationError(f"Failed to get token: {data.get('msg')}")
 
             self._tenant_access_token = data["tenant_access_token"]
             # Refresh 5 minutes before actual expiry
@@ -90,6 +104,9 @@ class FeishuClient:
     ) -> dict:
         """Send an authenticated request to Feishu Open API.
 
+        Automatically retries on 429 (rate limit) and 5xx errors with
+        exponential backoff.
+
         Args:
             method: HTTP method (GET, POST, PUT, DELETE, PATCH).
             path: API path (e.g. "/wiki/v2/spaces").
@@ -98,23 +115,77 @@ class FeishuClient:
 
         Returns:
             Parsed JSON response.
+
+        Raises:
+            AuthenticationError: If the token is invalid.
+            RateLimitError: If rate limited after all retries.
+            APIError: If the API returns a non-zero code.
         """
         await self._ensure_token()
 
         client = await self._get_client()
         headers = {"Authorization": f"Bearer {self._tenant_access_token}"}
 
-        resp = await client.request(
-            method, path, headers=headers, params=params, json=json,
-        )
+        last_exception: Exception | None = None
 
-        if resp.status_code >= 400:
-            try:
-                return resp.json()
-            except Exception:
-                resp.raise_for_status()
+        for attempt in range(MAX_RETRIES):
+            resp = await client.request(
+                method,
+                path,
+                headers=headers,
+                params=params,
+                json=json,
+            )
 
-        return resp.json()
+            if resp.status_code == 429:
+                retry_after = int(resp.headers.get("Retry-After", 2**attempt))
+                logger.warning(
+                    "Rate limited on %s %s, retrying in %ds (attempt %d/%d)",
+                    method,
+                    path,
+                    retry_after,
+                    attempt + 1,
+                    MAX_RETRIES,
+                )
+                await asyncio.sleep(retry_after)
+                last_exception = RateLimitError(retry_after)
+                continue
+
+            if resp.status_code >= 500:
+                wait = 2**attempt
+                logger.warning(
+                    "Server error %d on %s %s, retrying in %ds (attempt %d/%d)",
+                    resp.status_code,
+                    method,
+                    path,
+                    wait,
+                    attempt + 1,
+                    MAX_RETRIES,
+                )
+                await asyncio.sleep(wait)
+                last_exception = APIError(resp.status_code, f"HTTP {resp.status_code}")
+                continue
+
+            if resp.status_code == 401:
+                raise AuthenticationError("Unauthorized — check app_id and app_secret")
+
+            if resp.status_code >= 400:
+                try:
+                    data = resp.json()
+                    raise APIError(data.get("code", resp.status_code), data.get("msg", ""))
+                except (ValueError, KeyError):
+                    resp.raise_for_status()
+
+            data = resp.json()
+            if data.get("code", 0) != 0:
+                raise APIError(data["code"], data.get("msg", "Unknown error"))
+
+            return data
+
+        # All retries exhausted
+        if last_exception:
+            raise last_exception
+        raise APIError(-1, "All retries exhausted")
 
     async def upload(
         self,
@@ -133,6 +204,9 @@ class FeishuClient:
             file_data: File content as bytes.
             fields: Additional form fields.
             params: Query parameters.
+
+        Returns:
+            Parsed JSON response.
         """
         await self._ensure_token()
         headers = {"Authorization": f"Bearer {self._tenant_access_token}"}
@@ -142,7 +216,8 @@ class FeishuClient:
             timeout=httpx.Timeout(120.0, connect=10.0),
         ) as client:
             resp = await client.request(
-                "POST", path,
+                "POST",
+                path,
                 headers=headers,
                 params=params,
                 data=fields or {},
@@ -151,11 +226,15 @@ class FeishuClient:
 
             if resp.status_code >= 400:
                 try:
-                    return resp.json()
-                except Exception:
+                    data = resp.json()
+                    raise APIError(data.get("code", resp.status_code), data.get("msg", ""))
+                except (ValueError, KeyError):
                     resp.raise_for_status()
 
-            return resp.json()
+            data = resp.json()
+            if data.get("code", 0) != 0:
+                raise APIError(data["code"], data.get("msg", ""))
+            return data
 
     async def close(self) -> None:
         """Close the persistent HTTP client and release connections."""

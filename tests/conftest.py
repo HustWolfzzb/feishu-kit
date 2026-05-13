@@ -1,8 +1,6 @@
 """Shared test fixtures."""
 
-import json
 import pytest
-
 from feishu_kit.core.client import FeishuClient
 
 
@@ -21,21 +19,25 @@ class MockFeishuClient(FeishuClient):
         self._responses[path] = response
 
     async def request(self, method, path, *, params=None, json=None) -> dict:
-        self.calls.append({
-            "method": method,
-            "path": path,
-            "params": params,
-            "json": json,
-        })
+        self.calls.append(
+            {
+                "method": method,
+                "path": path,
+                "params": params,
+                "json": json,
+            }
+        )
         return self._responses.get(path, {"code": 0, "data": {}})
 
     async def upload(self, path, *, file_name, file_data, fields=None, params=None) -> dict:
-        self.calls.append({
-            "method": "UPLOAD",
-            "path": path,
-            "file_name": file_name,
-            "fields": fields,
-        })
+        self.calls.append(
+            {
+                "method": "UPLOAD",
+                "path": path,
+                "file_name": file_name,
+                "fields": fields,
+            }
+        )
         return self._responses.get(path, {"code": 0, "data": {"file_token": "mock_file_token"}})
 
     async def close(self):

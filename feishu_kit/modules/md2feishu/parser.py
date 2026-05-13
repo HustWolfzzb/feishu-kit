@@ -24,37 +24,54 @@ BLOCK_TABLE_CELL = 32
 
 # -- Code language mapping ---------------------------------------------
 LANG_MAP: dict[str, int] = {
-    "python": 49, "py": 49,
-    "javascript": 30, "js": 30,
-    "typescript": 63, "ts": 63,
-    "bash": 7, "shell": 7, "sh": 7, "zsh": 7,
+    "python": 49,
+    "py": 49,
+    "javascript": 30,
+    "js": 30,
+    "typescript": 63,
+    "ts": 63,
+    "bash": 7,
+    "shell": 7,
+    "sh": 7,
+    "zsh": 7,
     "c": 10,
-    "cpp": 9, "c++": 9, "cc": 9,
+    "cpp": 9,
+    "c++": 9,
+    "cc": 9,
     "java": 29,
     "go": 21,
-    "rust": 51, "rs": 51,
-    "ruby": 50, "rb": 50,
+    "rust": 51,
+    "rs": 51,
+    "ruby": 50,
+    "rb": 50,
     "sql": 55,
     "html": 25,
     "css": 14,
     "json": 31,
-    "yaml": 67, "yml": 67,
+    "yaml": 67,
+    "yml": 67,
     "xml": 66,
-    "markdown": 36, "md": 36,
-    "latex": 44, "tex": 44,
+    "markdown": 36,
+    "md": 36,
+    "latex": 44,
+    "tex": 44,
     "r": 48,
     "matlab": 37,
-    "perl": 45, "pl": 45,
+    "perl": 45,
+    "pl": 45,
     "php": 46,
     "swift": 58,
-    "kotlin": 32, "kt": 32,
+    "kotlin": 32,
+    "kt": 32,
     "scala": 53,
     "lua": 34,
     "dart": 16,
     "dockerfile": 17,
     "makefile": 35,
     "diff": 18,
-    "plaintext": 0, "text": 0, "": 0,
+    "plaintext": 0,
+    "text": 0,
+    "": 0,
 }
 
 
@@ -247,8 +264,7 @@ def _convert_list(token: dict[str, Any]) -> list[dict[str, Any]]:
         if item_type == "task_list_item":
             checked = item.get("attrs", {}).get("checked", False)
             elements = _inline_elements(
-                item.get("children", [{}])[0].get("children", [])
-                if item.get("children") else []
+                item.get("children", [{}])[0].get("children", []) if item.get("children") else []
             )
             todo_block = _make_block(BLOCK_TODO, elements)
             todo_block["todo"] = {"elements": elements}
@@ -259,9 +275,7 @@ def _convert_list(token: dict[str, Any]) -> list[dict[str, Any]]:
             sub_children = item.get("children", [])
             elements: list[dict[str, Any]] = []
             for sc in sub_children:
-                if sc["type"] == "block_text":
-                    elements.extend(_inline_elements(sc.get("children", [])))
-                elif sc["type"] == "paragraph":
+                if sc["type"] == "block_text" or sc["type"] == "paragraph":
                     elements.extend(_inline_elements(sc.get("children", [])))
             blocks.append(_make_block(block_type, elements))
     return blocks
@@ -271,9 +285,7 @@ def _convert_block_quote(token: dict[str, Any]) -> dict[str, Any]:
     """Convert a block_quote token to a Feishu quote block."""
     elements: list[dict[str, Any]] = []
     for child in token.get("children", []):
-        if child["type"] == "paragraph":
-            elements.extend(_inline_elements(child.get("children", [])))
-        elif child["type"] == "block_text":
+        if child["type"] == "paragraph" or child["type"] == "block_text":
             elements.extend(_inline_elements(child.get("children", [])))
     return _make_block(BLOCK_QUOTE, elements)
 
@@ -332,10 +344,12 @@ def _convert_table(token: dict[str, Any]) -> list[dict[str, Any]]:
                 "table_cell": {},
             }
             if cell_elements:
-                cell["children"] = [{
-                    "block_type": BLOCK_TEXT,
-                    "text": {"elements": cell_elements},
-                }]
+                cell["children"] = [
+                    {
+                        "block_type": BLOCK_TEXT,
+                        "text": {"elements": cell_elements},
+                    }
+                ]
             cells.append(cell)
 
     table_block["children"] = cells

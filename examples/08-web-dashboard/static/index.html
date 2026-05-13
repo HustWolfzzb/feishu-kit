@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>feishu-kit Dashboard</title>
+  <style>
+    :root {
+      --primary: #3370ff;
+      --bg: #f5f6f7;
+      --card: #ffffff;
+      --text: #1f2329;
+      --text-secondary: #646a73;
+      --border: #dee0e3;
+      --success: #34c724;
+      --radius: 8px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 24px 32px;
+    }
+    .header h1 { font-size: 24px; font-weight: 600; }
+    .header p { opacity: 0.85; margin-top: 4px; font-size: 14px; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .card h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card h2 .icon { font-size: 20px; }
+    .card .count {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .list { list-style: none; }
+    .list li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .list li:last-child { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      background: #e8f3ff;
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+    .node-tree { font-family: monospace; font-size: 13px; }
+    .node-tree .indent { padding-left: 20px; }
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>feishu-kit Dashboard</h1>
+    <p><span class="status-dot"></span>Connected to Feishu Open Platform</p>
+  </div>
+
+  <div class="container">
+    <div class="grid">
+      <div class="card" id="spaces-card">
+        <h2><span class="icon">📚</span> Knowledge Spaces</h2>
+        <div id="spaces" class="loading">Loading...</div>
+      </div>
+      <div class="card" id="chats-card">
+        <h2><span class="icon">💬</span> Bot Chats</h2>
+        <div id="chats" class="loading">Loading...</div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;" id="nodes-card">
+        <h2><span class="icon">🗂️</span> Space Nodes</h2>
+        <div id="nodes" class="loading">Select a space to view nodes...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+
+    async function loadSpaces() {
+      const el = document.getElementById('spaces');
+      try {
+        const resp = await fetch(API + '/api/spaces');
+        const items = await resp.json();
+        el.innerHTML = `<div class="count">${items.length}</div>` +
+          '<ul class="list">' +
+          items.map(s => `<li><span>${s.name || 'Untitled'}</span><span class="badge" style="cursor:pointer" onclick="loadNodes('${s.space_id}')">${s.space_id.slice(0,8)}...</span></li>`).join('') +
+          '</ul>';
+      } catch (e) {
+        el.innerHTML = '<span style="color:red">Failed to load</span>';
+      }
+    }
+
+    async function loadChats() {
+      const el = document.getElementById('chats');
+      try {
+        const resp = await fetch(API + '/api/chats');
+        const items = await resp.json();
+        el.innerHTML = `<div class="count">${items.length}</div>` +
+          '<ul class="list">' +
+          items.map(c => `<li><span>${c.name || 'DM'}</span><span class="badge">${c.user_count || '?'} members</span></li>`).join('') +
+          '</ul>';
+      } catch (e) {
+        el.innerHTML = '<span style="color:red">Failed to load</span>';
+      }
+    }
+
+    async function loadNodes(spaceId) {
+      const el = document.getElementById('nodes');
+      el.innerHTML = '<div class="loading">Loading nodes...</div>';
+      try {
+        const resp = await fetch(API + `/api/spaces/${spaceId}/nodes`);
+        const items = await resp.json();
+        el.innerHTML = `<div style="margin-bottom:12px;font-size:14px;color:#646a73">${items.length} nodes</div>` +
+          '<div class="node-tree">' +
+          items.map(n => `<div>📄 ${n.title || 'Untitled'} <span class="badge">${n.obj_type || ''}</span></div>`).join('') +
+          '</div>';
+      } catch (e) {
+        el.innerHTML = '<span style="color:red">Failed to load</span>';
+      }
+    }
+
+    loadSpaces();
+    loadChats();
+  </script>
+</body>
+</html>

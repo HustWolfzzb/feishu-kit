@@ -3,13 +3,12 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.task import TaskService
 from server.base import BaseModule
 
-
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -65,7 +64,8 @@ def create_task_router(service: TaskService) -> APIRouter:
     async def add_members(task_id: str, body: dict[str, Any]):
         try:
             return await service.add_members(
-                task_id, body["members"],
+                task_id,
+                body["members"],
                 user_id_type=body.get("user_id_type", "open_id"),
             )
         except Exception as e:
@@ -91,6 +91,7 @@ def create_task_router(service: TaskService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class TaskModule(BaseModule):
     @property

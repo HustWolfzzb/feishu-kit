@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from feishu_kit.modules.md2feishu.parser import parse_md_to_blocks, _text_element, _code_lang
+from feishu_kit.modules.md2feishu.parser import _code_lang, _text_element, parse_md_to_blocks
 from feishu_kit.modules.wiki.service import WikiService
 
 logger = logging.getLogger(__name__)
@@ -91,7 +91,10 @@ class Md2FeishuService:
         written, errors = await self._write_blocks(obj_token, page_block_id, blocks)
         logger.info(
             "Wrote %d/%d blocks to document %s (%d errors)",
-            written, len(blocks), obj_token, errors,
+            written,
+            len(blocks),
+            obj_token,
+            errors,
         )
 
         # 5. Create a child document -- attach raw Markdown source
@@ -117,9 +120,7 @@ class Md2FeishuService:
                         "elements": [_text_element(markdown)],
                     },
                 }
-                await self._wiki.create_doc_block(
-                    child_obj_token, child_page_id, [code_block]
-                )
+                await self._wiki.create_doc_block(child_obj_token, child_page_id, [code_block])
                 logger.info("Attached raw markdown to child doc %s", child_obj_token)
         except Exception as e:
             logger.warning("Failed to create raw markdown child doc: %s", e)
@@ -188,37 +189,33 @@ class Md2FeishuService:
 
         # 1. Batch-write normal blocks
         for i in range(0, len(normal_blocks), BATCH_SIZE):
-            batch = normal_blocks[i: i + BATCH_SIZE]
-            resp = await self._wiki.create_doc_block(
-                obj_token, page_block_id, batch
-            )
+            batch = normal_blocks[i : i + BATCH_SIZE]
+            resp = await self._wiki.create_doc_block(obj_token, page_block_id, batch)
             if resp.get("code", 0) == 0:
                 written += len(batch)
             else:
                 logger.warning(
                     "Batch write failed (code=%s): %s, retrying one-by-one",
-                    resp.get("code"), resp.get("msg"),
+                    resp.get("code"),
+                    resp.get("msg"),
                 )
                 for block in batch:
-                    r = await self._wiki.create_doc_block(
-                        obj_token, page_block_id, [block]
-                    )
+                    r = await self._wiki.create_doc_block(obj_token, page_block_id, [block])
                     if r.get("code", 0) == 0:
                         written += 1
                     else:
                         errors += 1
                         logger.error(
                             "Block type=%s failed: %s",
-                            block.get("block_type"), r.get("msg"),
+                            block.get("block_type"),
+                            r.get("msg"),
                         )
 
         # 2. Write table blocks (special handling)
         for table_block in table_blocks:
             cell_contents = table_block.pop("children", [])
             # Step 1: create the table block (Feishu auto-creates empty cell blocks)
-            resp = await self._wiki.create_doc_block(
-                obj_token, page_block_id, [table_block]
-            )
+            resp = await self._wiki.create_doc_block(obj_token, page_block_id, [table_block])
             if resp.get("code", 0) != 0:
                 errors += 1
                 logger.error("Table block failed: %s", resp.get("msg"))
@@ -245,15 +242,15 @@ class Md2FeishuService:
                 cell = cell_contents[idx]
                 cell_children = cell.get("children", [])
                 if cell_children:
-                    cell_resp = await self._wiki.create_doc_block(
-                        obj_token, cell_id, cell_children
-                    )
+                    cell_resp = await self._wiki.create_doc_block(obj_token, cell_id, cell_children)
                     if cell_resp.get("code", 0) == 0:
                         written += 1
                     else:
                         errors += 1
                         logger.error(
-                            "Cell %d write failed: %s", idx, cell_resp.get("msg"),
+                            "Cell %d write failed: %s",
+                            idx,
+                            cell_resp.get("msg"),
                         )
 
             table_block["children"] = cell_contents

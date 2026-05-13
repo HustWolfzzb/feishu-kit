@@ -7,13 +7,13 @@ Demonstrates:
     - Convert Markdown text to Feishu DocX blocks
     - Create a wiki document and write the converted content
 """
+
 import asyncio
 import os
 
 from feishu_kit import FeishuClient
-from feishu_kit.modules.wiki import WikiService
 from feishu_kit.modules.md2feishu import Md2FeishuService
-
+from feishu_kit.modules.wiki import WikiService
 
 MARKDOWN_CONTENT = """\
 # My Markdown Document
@@ -43,18 +43,16 @@ This document was created from Markdown using feishu-kit.
 
 
 async def main():
-    client = FeishuClient(
-        os.environ["FEISHU_APP_ID"],
-        os.environ["FEISHU_APP_SECRET"],
-    )
-
-    # md2feishu needs a WikiService injected
-    wiki = WikiService(client)
-    md_service = Md2FeishuService(wiki)
-
     SPACE_ID = os.environ.get("WIKI_SPACE_ID", "")
 
-    try:
+    async with FeishuClient(
+        os.environ["FEISHU_APP_ID"],
+        os.environ["FEISHU_APP_SECRET"],
+    ) as client:
+        # md2feishu needs a WikiService injected
+        wiki = WikiService(client)
+        md_service = Md2FeishuService(wiki)
+
         # Option 1: Preview blocks without pushing
         print("=== Preview (no API call) ===")
         blocks = md_service.preview(MARKDOWN_CONTENT)
@@ -69,9 +67,6 @@ async def main():
         )
         print(f"  Created: {result.get('url', '(no url)')}")
         print(f"  Blocks written: {result.get('blocks_written', 0)}")
-
-    finally:
-        await client.close()
 
 
 if __name__ == "__main__":

@@ -3,14 +3,13 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.messaging import MessagingService
+from pydantic import BaseModel
 from server.base import BaseModule
 
-
 # ── Request models ──────────────────────────────────────────
+
 
 class SendMessageBody(BaseModel):
     receive_id: str
@@ -47,6 +46,7 @@ class MemberIdListBody(BaseModel):
 
 
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -109,7 +109,9 @@ def create_messaging_router(service: MessagingService) -> APIRouter:
 
     @router.get("/messages")
     async def list_messages(
-        container_id: str, container_id_type: str = "chat", page_size: int = 20,
+        container_id: str,
+        container_id_type: str = "chat",
+        page_size: int = 20,
         page_token: str | None = None,
     ):
         try:
@@ -164,8 +166,11 @@ def create_messaging_router(service: MessagingService) -> APIRouter:
     async def create_chat(body: CreateChatBody):
         try:
             return await service.create_chat(
-                body.name, body.description, body.chat_mode,
-                body.chat_type, body.user_id_list,
+                body.name,
+                body.description,
+                body.chat_mode,
+                body.chat_type,
+                body.user_id_list,
             )
         except Exception as e:
             _handle(e)
@@ -174,7 +179,9 @@ def create_messaging_router(service: MessagingService) -> APIRouter:
     async def update_chat(chat_id: str, body: UpdateChatBody):
         try:
             return await service.update_chat(
-                chat_id, name=body.name, description=body.description,
+                chat_id,
+                name=body.name,
+                description=body.description,
             )
         except Exception as e:
             _handle(e)
@@ -190,7 +197,9 @@ def create_messaging_router(service: MessagingService) -> APIRouter:
 
     @router.get("/chats/{chat_id}/members")
     async def list_chat_members(
-        chat_id: str, member_id_type: str = "open_id", page_size: int = 50,
+        chat_id: str,
+        member_id_type: str = "open_id",
+        page_size: int = 50,
     ):
         try:
             return await service.list_chat_members(chat_id, member_id_type, page_size)
@@ -254,6 +263,7 @@ def create_messaging_router(service: MessagingService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class MessagingModule(BaseModule):
     @property

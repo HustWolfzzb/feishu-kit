@@ -3,9 +3,9 @@
 import logging
 
 from fastapi import FastAPI
-
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.core.pool import ClientPool
+
 from server.registry import ModuleRegistry
 
 logger = logging.getLogger(__name__)

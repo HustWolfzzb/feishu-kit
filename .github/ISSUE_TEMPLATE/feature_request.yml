@@ -1,0 +1,74 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for feishu-kit.
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please describe the problem and your proposed solution below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: |
+        What problem are you trying to solve? What limitation in feishu-kit is blocking you?
+        Please include any real-world use cases.
+      placeholder: |
+        I want to ... but feishu-kit currently does not support ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: |
+        How would you like this to work? Include API sketches, method signatures,
+        or usage examples if possible.
+      placeholder: |
+        Add a new module `feishu_kit.modules.approval` with:
+
+        class ApprovalService:
+            async def create_instance(self, approval_code: str, ...): ...
+            async def list_instances(self, approval_code: str, ...): ...
+      render: python
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of feishu-kit does this relate to?
+      options:
+        - Core (FeishuClient / ClientPool)
+        - Wiki module
+        - Drive module
+        - Messaging module
+        - Contacts module
+        - Calendar module
+        - Task module
+        - Markdown-to-Feishu (md2feishu)
+        - CLI
+        - FastAPI server
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you tried any workarounds or alternative approaches?
+      placeholder: |
+        I currently work around this by calling the Feishu API directly using httpx ...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Links to Feishu API docs, related issues, or any other relevant information.
+      placeholder: |
+        Feishu API reference: https://open.feishu.cn/document/...

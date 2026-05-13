@@ -34,7 +34,9 @@ class ContactsService:
         return await self._client.request("GET", "/contact/v3/users", params=params)
 
     async def batch_get_user_id(
-        self, mobiles: list[str] | None = None, emails: list[str] | None = None,
+        self,
+        mobiles: list[str] | None = None,
+        emails: list[str] | None = None,
     ) -> dict:
         """通过手机号或邮箱批量获取用户 ID。"""
         body: dict = {}
@@ -43,13 +45,18 @@ class ContactsService:
         if emails:
             body["emails"] = emails
         return await self._client.request(
-            "POST", "/contact/v3/users/batch_get_id", json=body,
+            "POST",
+            "/contact/v3/users/batch_get_id",
+            json=body,
         )
 
     # ── 部门 ────────────────────────────────────────────────────────
     async def list_departments(
-        self, parent_department_id: str = "0", page_size: int = 20,
-        department_id_type: str = "open_department_id", fetch_child: bool = False,
+        self,
+        parent_department_id: str = "0",
+        page_size: int = 20,
+        department_id_type: str = "open_department_id",
+        fetch_child: bool = False,
     ) -> dict:
         """获取子部门列表。"""
         return await self._client.request(
@@ -63,7 +70,9 @@ class ContactsService:
         )
 
     async def get_department_sub_departments(
-        self, parent_department_id: str = "0", page_size: int = 20,
+        self,
+        parent_department_id: str = "0",
+        page_size: int = 20,
         department_id_type: str = "open_department_id",
     ) -> dict:
         """获取子部门列表 — 使用 list 接口。"""
@@ -79,7 +88,9 @@ class ContactsService:
         )
 
     async def get_department(
-        self, department_id: str, department_id_type: str = "open_department_id",
+        self,
+        department_id: str,
+        department_id_type: str = "open_department_id",
     ) -> dict:
         """获取部门详情。"""
         return await self._client.request(
@@ -90,11 +101,14 @@ class ContactsService:
 
     # ── 用户组 ──────────────────────────────────────────────────────
     async def list_group_members(
-        self, group_id: str, page_size: int = 20,
+        self,
+        group_id: str,
+        page_size: int = 20,
     ) -> dict:
         """获取用户组成员列表。"""
         return await self._client.request(
-            "GET", "/contact/v3/group/list",
+            "GET",
+            "/contact/v3/group/list",
             params={"group_id": group_id, "page_size": str(page_size)},
         )
 

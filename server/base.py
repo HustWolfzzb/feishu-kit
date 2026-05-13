@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 
 from fastapi import APIRouter
-
 from feishu_kit.core.client import FeishuClient
 
 

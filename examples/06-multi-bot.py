@@ -7,6 +7,7 @@ Demonstrates:
     - Create a ClientPool with multiple bots
     - Use different bots for different operations
 """
+
 import asyncio
 import os
 

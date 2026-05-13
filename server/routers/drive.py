@@ -2,15 +2,14 @@
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Query
-from pydantic import BaseModel
-
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.drive import DriveService
+from pydantic import BaseModel
 from server.base import BaseModule
 
-
 # ── Request models ──────────────────────────────────────────
+
 
 class CreateFolderBody(BaseModel):
     folder_token: str
@@ -26,6 +25,7 @@ class AddMemberBody(BaseModel):
 
 
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -83,7 +83,11 @@ def create_drive_router(service: DriveService) -> APIRouter:
     async def add_permission(body: AddMemberBody):
         try:
             return await service.add_file_member(
-                body.token, body.obj_type, body.member_type, body.member_id, body.perm,
+                body.token,
+                body.obj_type,
+                body.member_type,
+                body.member_id,
+                body.perm,
             )
         except Exception as e:
             _handle(e)
@@ -108,7 +112,9 @@ def create_drive_router(service: DriveService) -> APIRouter:
             if len(data) > 20 * 1024 * 1024:
                 raise HTTPException(status_code=400, detail="File exceeds 20MB limit")
             result = await service.upload_file(
-                folder_token, file.filename, data,
+                folder_token,
+                file.filename,
+                data,
             )
             if result.get("code") != 0:
                 raise HTTPException(status_code=502, detail=str(result))
@@ -122,6 +128,7 @@ def create_drive_router(service: DriveService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class DriveModule(BaseModule):
     @property

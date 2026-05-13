@@ -1,65 +1,123 @@
-# feishu-kit
+<p align="center">
+  <pre>
+ ███████╗███████╗██╗     ██╗         ██████╗ ██╗  ██╗██╗████████╗
+ ██╔════╝██╔════╝██║     ██║         ██╔══██╗██║ ██╔╝██║╚══██╔══╝
+ █████╗  █████╗  ██║     ██║         ██████╔╝█████╔╝ ██║   ██║
+ ██╔══╝  ██╔══╝  ██║     ██║         ██╔═══╝ ██╔═██╗ ██║   ██║
+ ██║     ███████╗███████╗███████╗    ██║     ██║  ██╗██║   ██║
+ ╚═╝     ╚══════╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝   ╚═╝
+  </pre>
+</p>
 
-A modular Python toolkit for [Feishu (Lark) Open Platform](https://open.feishu.cn/) — reusable API wrappers, independent modules, and an optional FastAPI server layer.
+<p align="center">
+  <strong>A modular, async-first Python toolkit for Feishu (Lark) Open Platform</strong><br>
+  7 API modules · CLI · FastAPI server · Markdown converter · Course-friendly
+</p>
 
-Designed as a **course-friendly open-source project** for students and junior developers learning to build Feishu integrations.
+<p align="center">
+  <a href="https://github.com/HustWolfzzb/feishu-kit/actions/workflows/ci.yml">
+    <img src="https://github.com/HustWolfzzb/feishu-kit/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+  <a href="https://pypi.org/project/feishu-kit/">
+    <img src="https://img.shields.io/pypi/v/feishu-kit?color=blue" alt="PyPI">
+  </a>
+  <a href="https://pypi.org/project/feishu-kit/">
+    <img src="https://img.shields.io/pypi/pyversions/feishu-kit" alt="Python">
+  </a>
+  <a href="https://github.com/HustWolfzzb/feishu-kit/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/HustWolfzzb/feishu-kit" alt="License">
+  </a>
+  <a href="https://hustwolfzzb.github.io/feishu-kit/">
+    <img src="https://img.shields.io/badge/docs-mkdocs-material-blue" alt="Docs">
+  </a>
+  <a href="https://github.com/HustWolfzzb/feishu-kit">
+    <img src="https://img.shields.io/github/stars/HustWolfzzb/feishu-kit?style=social" alt="GitHub Stars">
+  </a>
+</p>
 
-## Features
+---
 
-- **FeishuClient** — Automatic token management, connection pooling, upload support
-- **ClientPool** — Multi-bot support out of the box
-- **7 API modules** — Wiki, Drive, Messaging, Contacts, Calendar, Task, Markdown-to-Feishu
-- **Zero FastAPI dependency** in core — use in scripts, Jupyter, CLI, any framework
-- **Optional server layer** — FastAPI app factory with auto-discovery module system
-- **Course-ready** — Progressive examples from "Hello Feishu" to a full AI Agent
+## :sparkles: Feature Grid
 
-## Quick Start
+| | Module | What it does |
+|:---:|:-------|:-------------|
+| :books: | **Wiki** | Spaces, nodes, docs, permissions, RAG retrieval |
+| :floppy_disk: | **Drive** | Upload, download, folders, permissions |
+| :speech_balloon: | **Messaging** | Send, reply, chats, reactions, pins |
+| :busts_in_silhouette: | **Contacts** | Users, departments, groups |
+| :calendar: | **Calendar** | Events, calendars, free/busy query |
+| :white_check_mark: | **Task** | Tasks, task lists, members, comments |
+| :memo: | **md2feishu** | Markdown → Feishu DocX with one call |
 
-### 1. Install
+Plus a :rocket: **CLI** (`feishu-kit` command) and an optional :globe_with_meridians: **FastAPI server** layer.
+
+---
+
+## :zap: Quick Start
+
+### Install
 
 ```bash
 pip install feishu-kit
-
-# Or with FastAPI server support:
-pip install "feishu-kit[server]"
 ```
 
-### 2. Get your credentials
+### CLI (zero code)
 
-Create a Feishu App at [open.feishu.cn](https://open.feishu.cn/app) and note down your `App ID` and `App Secret`.
+```bash
+export FEISHU_APP_ID="cli_xxx"
+export FEISHU_APP_SECRET="xxx"
 
-### 3. Hello Feishu
+feishu-kit spaces
+```
+
+Output:
+
+```
+        Name         │         Space ID        │ Description
+ ────────────────────┼─────────────────────────┼─────────────
+  Embodied AI Course  │  7264xxxxxx              │  Course wiki
+  Project Docs        │  7389xxxxxx              │  Team docs
+```
+
+### Python (5 lines)
 
 ```python
 import asyncio
 from feishu_kit import FeishuClient
 
 async def main():
-    client = FeishuClient(app_id="cli_xxx", app_secret="xxx")
-    result = await client.request("GET", "/wiki/v2/spaces")
-    for space in result.get("data", {}).get("items", []):
-        print(f"📚 {space['name']} (id={space['space_id']})")
-    await client.close()
+    async with FeishuClient(app_id="cli_xxx", app_secret="xxx") as client:
+        result = await client.request("GET", "/wiki/v2/spaces")
+        for space in result.get("data", {}).get("items", []):
+            print(f"📚 {space['name']}")
 
 asyncio.run(main())
 ```
 
-### 4. Use a module
+### Use a module
 
 ```python
 from feishu_kit import FeishuClient
 from feishu_kit.modules.wiki import WikiService
 
-client = FeishuClient(app_id="cli_xxx", app_secret="xxx")
-wiki = WikiService(client)
-
-# List all nodes in a space
-nodes = await wiki.list_all_nodes("your_space_id")
-for node in nodes:
-    print(node["title"])
+async with FeishuClient(app_id="cli_xxx", app_secret="xxx") as client:
+    wiki = WikiService(client)
+    nodes = await wiki.list_all_nodes("your_space_id")
+    for node in nodes:
+        print(node["title"])
 ```
 
-### 5. Multi-bot support
+### Push Markdown to Wiki
+
+```python
+from feishu_kit.modules.md2feishu import Md2FeishuService
+
+md = Md2FeishuService(wiki)
+result = await md.push_markdown("# Hello\n\nWorld!", title="My Doc", space_id="...")
+print(result["url"])
+```
+
+### Multi-bot
 
 ```python
 from feishu_kit import ClientPool
@@ -67,48 +125,117 @@ from feishu_kit import ClientPool
 pool = ClientPool()
 pool.add("default", "cli_app1_id", "cli_app1_secret")
 pool.add("bot2", "cli_app2_id", "cli_app2_secret")
-
-wiki1 = WikiService(pool.default)
-wiki2 = WikiService(pool.get("bot2"))
 ```
 
-## Project Structure
+---
 
+## :building_construction: Architecture
+
+```mermaid
+graph TD
+    subgraph CLI ["🖥️ CLI Layer"]
+        CLI_APP["feishu-kit<br/>(typer + rich)"]
+    end
+
+    subgraph Server ["🌐 Server Layer (optional)"]
+        FASTAPI["FastAPI App"]
+        REGISTRY["ModuleRegistry<br/>(auto-discovery)"]
+        ROUTERS["Routers<br/>wiki · drive · msg · ..."]
+    end
+
+    subgraph Modules ["📦 Module Layer"]
+        WIKI["WikiService"]
+        DRIVE["DriveService"]
+        MSG["MessagingService"]
+        MD2F["Md2FeishuService"]
+        OTHER["Contacts · Calendar · Task"]
+    end
+
+    subgraph Core ["⚙️ Core Layer"]
+        CLIENT["FeishuClient<br/>(token · httpx · retry)"]
+        POOL["ClientPool"]
+        EXC["Exceptions"]
+    end
+
+    CLI_APP --> CLIENT
+    CLI_APP --> WIKI
+    CLI_APP --> DRIVE
+    CLI_APP --> MSG
+    FASTAPI --> REGISTRY --> ROUTERS --> Modules
+    WIKI --> CLIENT
+    DRIVE --> CLIENT
+    MSG --> CLIENT
+    MD2F --> WIKI
+    OTHER --> CLIENT
+    POOL --> CLIENT
+    CLIENT --> EXC
 ```
-feishu-kit/
-├── feishu_kit/              # Core package (no FastAPI dependency)
-│   ├── core/                # FeishuClient, ClientPool, Settings
-│   └── modules/             # wiki, drive, messaging, contacts, calendar, task, md2feishu
-├── server/                  # Optional FastAPI server layer
-│   ├── base.py              # BaseModule abstract class
-│   ├── registry.py          # Auto-discovery module registry
-│   └── routers/             # Per-module FastAPI routes
-├── docs/                    # Tutorials and API reference
-├── examples/                # Progressive course examples
-└── tests/                   # Unit tests with mock client
-```
 
-## Modules
+---
 
-| Module | Description | Key Methods |
-|--------|-------------|-------------|
-| **wiki** | Knowledge base (spaces, nodes, docs, permissions) | `list_spaces`, `create_node`, `get_doc_blocks`, `search_nodes` |
-| **drive** | Cloud drive (files, folders, upload, download) | `upload_file`, `list_files`, `download`, `create_folder` |
-| **messaging** | IM (messages, chats, message cards) | `send_message`, `list_chats`, `reply_message` |
-| **contacts** | Directory (users, departments, groups) | `list_users`, `list_departments`, `get_user` |
-| **calendar** | Calendar events | `list_events`, `create_event` |
-| **task** | Task management | `list_tasks`, `create_task` |
-| **md2feishu** | Markdown → Feishu document conversion | `push_markdown`, `preview` |
+## :grey_question: Why feishu-kit?
 
-## Documentation
+| | Reason |
+|:---:|:-------|
+| :electric_plug: | **Async-first** — every API call is `async`, powered by httpx connection pooling |
+| :scissors: | **Zero framework lock-in** — core has no FastAPI dependency; use in scripts, Jupyter, any web framework |
+| :card_file_box: | **Modular** — each module is independent; import only what you need |
+| :shield: | **Resilient** — automatic retries with exponential backoff on 429/5xx |
+| :teacher: | **Course-friendly** — progressive examples from "Hello Feishu" to a full AI Agent course builder |
 
-- [Getting Started](docs/getting-started.md) — Setup, credentials, first script
-- [Wiki Tutorial](docs/tutorial-wiki.md) — Knowledge base operations
-- [Drive Tutorial](docs/tutorial-drive.md) — File management
-- [Messaging Tutorial](docs/tutorial-messaging.md) — Messages and chats
-- [Markdown to Feishu](docs/tutorial-md2feishu.md) — Convert and push documents
-- [Server Tutorial](docs/tutorial-server.md) — Build a FastAPI service
+---
 
-## License
+## :gear: CLI Reference
 
-MIT
+| Command | Description |
+|---------|-------------|
+| `feishu-kit spaces` | List knowledge spaces |
+| `feishu-kit nodes <space_id>` | List nodes in a space (tree view) |
+| `feishu-kit push <file.md> <space_id>` | Push Markdown file to Wiki |
+| `feishu-kit inspect <token>` | Inspect document content |
+| `feishu-kit chats` | List bot chats |
+| `feishu-kit version` | Print version with banner |
+
+All commands read `FEISHU_APP_ID` and `FEISHU_APP_SECRET` from environment variables.
+
+---
+
+## :books: Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Getting Started](docs/getting-started.md) | Environment setup, first script |
+| [Wiki Tutorial](docs/tutorial-wiki.md) | Knowledge base CRUD operations |
+| [Drive Tutorial](docs/tutorial-drive.md) | File upload, download, permissions |
+| [Messaging Tutorial](docs/tutorial-messaging.md) | Messages, chats, cards |
+| [Markdown to Feishu](docs/tutorial-md2feishu.md) | Convert and push documents |
+| [Server Tutorial](docs/tutorial-server.md) | Build a FastAPI REST API |
+| [Course Builder Guide](docs/project-build-course.md) | End-to-end course creation with AI Agent |
+
+---
+
+## :test_tube: Examples
+
+| # | Example | What you learn |
+|---|---------|----------------|
+| 01 | [Hello Feishu](examples/01-hello-feishu.py) | Minimal script, list knowledge spaces |
+| 02 | [Wiki Basics](examples/02-wiki-basics.py) | CRUD operations on wiki nodes |
+| 03 | [Write Document](examples/03-write-document.py) | Create docs, write content blocks |
+| 04 | [Upload File](examples/04-upload-file.py) | Upload to Drive, move into Wiki |
+| 05 | [MD to Wiki](examples/05-md-to-wiki.py) | Convert Markdown to Feishu docs |
+| 06 | [Multi-Bot](examples/06-multi-bot.py) | Manage multiple bots with ClientPool |
+| 07 | [Course Builder](examples/07-course-builder/course_builder.py) | Full course creation + PPT generation |
+
+---
+
+## :handshake: Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR process.
+
+## :scroll: Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+## :page_facing_up: License
+
+[MIT](LICENSE) — free for personal and commercial use.

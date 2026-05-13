@@ -8,6 +8,7 @@ Demonstrates:
     - Write heading, text, and bullet blocks
     - Read back the document content
 """
+
 import asyncio
 import os
 
@@ -21,14 +22,14 @@ def text_run(content: str, bold: bool = False) -> dict:
 
 
 async def main():
-    client = FeishuClient(
-        os.environ["FEISHU_APP_ID"],
-        os.environ["FEISHU_APP_SECRET"],
-    )
-    wiki = WikiService(client)
     SPACE_ID = os.environ.get("WIKI_SPACE_ID", "")
 
-    try:
+    async with FeishuClient(
+        os.environ["FEISHU_APP_ID"],
+        os.environ["FEISHU_APP_SECRET"],
+    ) as client:
+        wiki = WikiService(client)
+
         # 1. Create document
         result = await wiki.create_node(SPACE_ID, title="Demo Document")
         node = result.get("data", {}).get("node", {})
@@ -39,11 +40,21 @@ async def main():
         blocks = [
             {
                 "block_type": 4,  # heading2
-                "heading2": {"elements": [text_run("Hello from feishu-kit!", bold=True)], "style": {}},
+                "heading2": {
+                    "elements": [text_run("Hello from feishu-kit!", bold=True)],
+                    "style": {},
+                },
             },
             {
                 "block_type": 2,  # text
-                "text": {"elements": [text_run("This document was created programmatically using the feishu-kit library.")], "style": {}},
+                "text": {
+                    "elements": [
+                        text_run(
+                            "This document was created programmatically using the feishu-kit library."
+                        )
+                    ],
+                    "style": {},
+                },
             },
             {
                 "block_type": 5,  # heading3
@@ -71,9 +82,6 @@ async def main():
         content = raw.get("data", {}).get("content", "")
         print(f"\nDocument content ({len(content)} chars):")
         print(content[:500])
-
-    finally:
-        await client.close()
 
 
 if __name__ == "__main__":

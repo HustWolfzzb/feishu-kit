@@ -7,6 +7,7 @@ Requires:
     export FEISHU_APP_ID="cli_xxx"
     export FEISHU_APP_SECRET="xxx"
 """
+
 import asyncio
 import os
 
@@ -17,9 +18,7 @@ async def main():
     app_id = os.environ["FEISHU_APP_ID"]
     app_secret = os.environ["FEISHU_APP_SECRET"]
 
-    client = FeishuClient(app_id, app_secret)
-
-    try:
+    async with FeishuClient(app_id, app_secret) as client:
         result = await client.request("GET", "/wiki/v2/spaces")
         items = result.get("data", {}).get("items", [])
 
@@ -32,9 +31,6 @@ async def main():
             name = space.get("name", "(untitled)")
             space_id = space.get("space_id", "")
             print(f"  📚 {name}  (id={space_id})")
-
-    finally:
-        await client.close()
 
 
 if __name__ == "__main__":

@@ -14,3 +14,19 @@ venv/
 .ruff_cache/
 *.egg-info/
 feishu_kit.egg-info/
+
+# Docs build output
+site/
+
+# Ruff cache
+.ruff_cache/
+
+# Distribution artifacts
+*.whl
+
+# Local environment overrides
+.env.local
+
+# IDE / editor directories
+.idea/
+.vscode/

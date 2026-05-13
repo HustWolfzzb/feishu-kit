@@ -7,6 +7,7 @@ Demonstrates:
     - Upload a file to Feishu Drive
     - Move the file from Drive into a Wiki space
 """
+
 import asyncio
 import os
 
@@ -16,15 +17,15 @@ from feishu_kit.modules.wiki import WikiService
 
 
 async def main():
-    client = FeishuClient(
-        os.environ["FEISHU_APP_ID"],
-        os.environ["FEISHU_APP_SECRET"],
-    )
-    drive = DriveService(client)
-    wiki = WikiService(client)
     SPACE_ID = os.environ.get("WIKI_SPACE_ID", "")
 
-    try:
+    async with FeishuClient(
+        os.environ["FEISHU_APP_ID"],
+        os.environ["FEISHU_APP_SECRET"],
+    ) as client:
+        drive = DriveService(client)
+        wiki = WikiService(client)
+
         # 1. Create a test file in memory
         file_content = b"Hello from feishu-kit!\nThis is an uploaded text file."
         file_name = "hello-feishu-kit.txt"
@@ -47,9 +48,6 @@ async def main():
             print(f"  Move result: code={move_result.get('code')}")
             if move_result.get("data", {}).get("wiki_token"):
                 print(f"  Wiki token: {move_result['data']['wiki_token']}")
-
-    finally:
-        await client.close()
 
 
 if __name__ == "__main__":

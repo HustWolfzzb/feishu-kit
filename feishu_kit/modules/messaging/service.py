@@ -49,8 +49,13 @@ class MessagingService:
         )
 
     async def list_messages(
-        self, container_id: str, container_id_type: str = "chat", page_size: int = 20,
-        page_token: str | None = None, start_time: str | None = None, end_time: str | None = None,
+        self,
+        container_id: str,
+        container_id_type: str = "chat",
+        page_size: int = 20,
+        page_token: str | None = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
     ) -> dict:
         """获取会话内消息列表。"""
         params: dict = {
@@ -73,20 +78,24 @@ class MessagingService:
         if emoji:
             body["emoji"] = emoji
         return await self._client.request(
-            "POST", f"/im/v1/messages/{message_id}/reactions", json=body,
+            "POST",
+            f"/im/v1/messages/{message_id}/reactions",
+            json=body,
         )
 
     async def list_reactions(self, message_id: str, page_size: int = 20) -> dict:
         """获取消息回应列表。"""
         return await self._client.request(
-            "GET", f"/im/v1/messages/{message_id}/reactions",
+            "GET",
+            f"/im/v1/messages/{message_id}/reactions",
             params={"page_size": str(page_size)},
         )
 
     async def delete_reaction(self, message_id: str, reaction_id: str) -> dict:
         """删除消息回应。"""
         return await self._client.request(
-            "DELETE", f"/im/v1/messages/{message_id}/reactions/{reaction_id}",
+            "DELETE",
+            f"/im/v1/messages/{message_id}/reactions/{reaction_id}",
         )
 
     # ── 群聊管理 ────────────────────────────────────────────────────
@@ -137,7 +146,9 @@ class MessagingService:
         if description is not None:
             body["description"] = description
         return await self._client.request(
-            "PUT", f"/im/v1/chats/{chat_id}", json=body,
+            "PUT",
+            f"/im/v1/chats/{chat_id}",
+            json=body,
         )
 
     async def disband_chat(self, chat_id: str) -> dict:
@@ -146,7 +157,10 @@ class MessagingService:
 
     # ── 群成员管理 ──────────────────────────────────────────────────
     async def list_chat_members(
-        self, chat_id: str, member_id_type: str = "open_id", page_size: int = 50,
+        self,
+        chat_id: str,
+        member_id_type: str = "open_id",
+        page_size: int = 50,
     ) -> dict:
         """获取群成员列表。"""
         return await self._client.request(
@@ -156,7 +170,10 @@ class MessagingService:
         )
 
     async def add_chat_members(
-        self, chat_id: str, id_list: list[str], id_type: str = "open_id",
+        self,
+        chat_id: str,
+        id_list: list[str],
+        id_type: str = "open_id",
     ) -> dict:
         """添加群成员。"""
         return await self._client.request(
@@ -167,7 +184,10 @@ class MessagingService:
         )
 
     async def remove_chat_members(
-        self, chat_id: str, id_list: list[str], id_type: str = "open_id",
+        self,
+        chat_id: str,
+        id_list: list[str],
+        id_type: str = "open_id",
     ) -> dict:
         """移除群成员。"""
         return await self._client.request(
@@ -198,13 +218,17 @@ class MessagingService:
     async def pin_message(self, chat_id: str, message_id: str) -> dict:
         """置顶消息。"""
         return await self._client.request(
-            "POST", f"/im/v1/chats/{chat_id}/pins", json={"message_id": message_id},
+            "POST",
+            f"/im/v1/chats/{chat_id}/pins",
+            json={"message_id": message_id},
         )
 
     async def unpin_message(self, chat_id: str, message_id: str) -> dict:
         """取消置顶。"""
         return await self._client.request(
-            "DELETE", f"/im/v1/chats/{chat_id}/pins", json={"message_id": message_id},
+            "DELETE",
+            f"/im/v1/chats/{chat_id}/pins",
+            json={"message_id": message_id},
         )
 
     async def list_pins(self, chat_id: str) -> dict:
@@ -223,5 +247,6 @@ class MessagingService:
     async def delete_chat_top_notice(self, chat_id: str) -> dict:
         """删除群公告。"""
         return await self._client.request(
-            "DELETE", f"/im/v1/chats/{chat_id}/top_notice",
+            "DELETE",
+            f"/im/v1/chats/{chat_id}/top_notice",
         )

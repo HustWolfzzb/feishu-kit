@@ -1,16 +1,13 @@
 """Contacts module router for FastAPI server."""
 
-from typing import Any
-
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.contacts import ContactsService
+from pydantic import BaseModel
 from server.base import BaseModule
 
-
 # ── Request models ──────────────────────────────────────────
+
 
 class BatchUserIdBody(BaseModel):
     mobiles: list[str] | None = None
@@ -18,6 +15,7 @@ class BatchUserIdBody(BaseModel):
 
 
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -119,6 +117,7 @@ def create_contacts_router(service: ContactsService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class ContactsModule(BaseModule):
     @property

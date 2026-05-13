@@ -1,17 +1,17 @@
 """MD-to-Feishu module router for FastAPI server."""
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
-from pydantic import BaseModel
-
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from feishu_kit.core.client import FeishuClient
 from feishu_kit.modules.md2feishu import Md2FeishuService
+from pydantic import BaseModel
 from server.base import BaseModule
-
 
 # ── Request models ──────────────────────────────────────────
 
+
 class PushBody(BaseModel):
     """JSON push request body."""
+
     markdown: str
     title: str
     space_id: str = "7419131084779126787"
@@ -20,10 +20,12 @@ class PushBody(BaseModel):
 
 class PreviewBody(BaseModel):
     """Preview request body."""
+
     markdown: str
 
 
 # ── Router factory ──────────────────────────────────────────
+
 
 def _handle(exc: Exception):
     """Unified error handler."""
@@ -79,6 +81,7 @@ def create_md2feishu_router(service: Md2FeishuService) -> APIRouter:
 
 
 # ── Module class ────────────────────────────────────────────
+
 
 class Md2FeishuModule(BaseModule):
     @property

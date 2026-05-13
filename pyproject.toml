@@ -22,7 +22,12 @@ dependencies = [
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
     "mistune>=3.0",
+    "typer>=0.12.0",
+    "rich>=13.0",
 ]
+
+[project.scripts]
+feishu-kit = "feishu_kit.cli:app"
 
 [project.optional-dependencies]
 server = [
@@ -30,10 +35,16 @@ server = [
     "uvicorn[standard]>=0.34.0",
     "python-multipart>=0.0.6",
 ]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "ruff>=0.8",
+    "pre-commit>=4.0",
 ]
 
 [build-system]
@@ -42,3 +53,16 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["feishu_kit*", "server*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["feishu_kit", "server", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003", "B027", "B008", "B904"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

@@ -1,12 +1,11 @@
 """日历服务 — 封装飞书 Calendar API"""
 
-import time
-
 from pydantic import BaseModel
 
 
 class EventCreate(BaseModel):
     """创建日程请求体（自动转换时间格式）。"""
+
     summary: str = ""
     description: str = ""
     start_time: str  # ISO 格式 "2026-04-21T10:00:00+08:00" 或 Unix 秒
@@ -29,6 +28,7 @@ def _to_timestamp(val) -> dict:
         return {"timestamp": s}
     # ISO 8601 → Unix timestamp
     from datetime import datetime
+
     dt = datetime.fromisoformat(s)
     return {"timestamp": str(int(dt.timestamp()))}
 
@@ -52,8 +52,12 @@ class CalendarService:
 
     # ── 日程 ────────────────────────────────────────────────────────
     async def list_events(
-        self, calendar_id: str, start_time: str = "", end_time: str = "",
-        page_size: int = 20, page_token: str | None = None,
+        self,
+        calendar_id: str,
+        start_time: str = "",
+        end_time: str = "",
+        page_size: int = 20,
+        page_token: str | None = None,
     ) -> dict:
         params: dict = {"page_size": str(page_size)}
         if start_time:
@@ -65,7 +69,9 @@ class CalendarService:
         if page_token:
             params["page_token"] = page_token
         return await self._client.request(
-            "GET", f"/calendar/v4/calendars/{calendar_id}/events", params=params,
+            "GET",
+            f"/calendar/v4/calendars/{calendar_id}/events",
+            params=params,
         )
 
     async def create_event(self, calendar_id: str, event: dict) -> dict:
@@ -76,12 +82,15 @@ class CalendarService:
         if "end_time" in body:
             body["end_time"] = _to_timestamp(str(body["end_time"]))
         return await self._client.request(
-            "POST", f"/calendar/v4/calendars/{calendar_id}/events", json=body,
+            "POST",
+            f"/calendar/v4/calendars/{calendar_id}/events",
+            json=body,
         )
 
     async def get_event(self, calendar_id: str, event_id: str) -> dict:
         return await self._client.request(
-            "GET", f"/calendar/v4/calendars/{calendar_id}/events/{event_id}",
+            "GET",
+            f"/calendar/v4/calendars/{calendar_id}/events/{event_id}",
         )
 
     async def update_event(self, calendar_id: str, event_id: str, event: dict) -> dict:
@@ -91,18 +100,22 @@ class CalendarService:
         if "end_time" in body:
             body["end_time"] = _to_timestamp(str(body["end_time"]))
         return await self._client.request(
-            "PATCH", f"/calendar/v4/calendars/{calendar_id}/events/{event_id}", json=body,
+            "PATCH",
+            f"/calendar/v4/calendars/{calendar_id}/events/{event_id}",
+            json=body,
         )
 
     async def delete_event(self, calendar_id: str, event_id: str) -> dict:
         return await self._client.request(
-            "DELETE", f"/calendar/v4/calendars/{calendar_id}/events/{event_id}",
+            "DELETE",
+            f"/calendar/v4/calendars/{calendar_id}/events/{event_id}",
         )
 
     # ── 忙闲查询 ──────────────────────────────────────────────────
     async def freebusy(self, user_id: str, start_time: str, end_time: str) -> dict:
         return await self._client.request(
-            "POST", "/calendar/v4/freebusy/list",
+            "POST",
+            "/calendar/v4/freebusy/list",
             json={
                 "user_id": user_id,
                 "start_time": _to_timestamp(start_time),

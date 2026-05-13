@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 from fastapi import FastAPI
-
 from feishu_kit.core.client import FeishuClient
+
 from server.base import BaseModule
 
 logger = logging.getLogger(__name__)
@@ -98,9 +98,7 @@ class ModuleRegistry:
             path = route.path
             if path == prefix or path.startswith(prefix + "/"):
                 return True
-            if hasattr(route, "routes"):
-                return True
-            return False
+            return bool(hasattr(route, "routes"))
 
         app.routes[:] = [r for r in app.routes if not _route_belongs(r, old_prefix)]
 

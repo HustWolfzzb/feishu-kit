@@ -1,8 +1,8 @@
 """Tests for ClientPool."""
 
 import pytest
-from feishu_kit.core.pool import ClientPool
 from feishu_kit.core.client import FeishuClient
+from feishu_kit.core.pool import ClientPool
 
 
 def test_add_and_get():
