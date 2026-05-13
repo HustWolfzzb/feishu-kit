@@ -41,7 +41,15 @@ nav:
       - Server: tutorial-server.md
   - CLI: cli-guide.md
   - API Reference: api-reference.md
-  - Course Builder: project-build-course.md
+  - Course Builder:
+      - Overview: course/index.md
+      - Ch1: 环境准备: course/ch01-setup.md
+      - Ch2: 文档骨架: course/ch02-outline.md
+      - Ch3: AI 填充内容: course/ch03-fill-content.md
+      - Ch4: 内容审查: course/ch04-review.md
+      - Ch5: PPT 课件: course/ch05-ppt.md
+      - Ch6: 学术引用: course/ch06-enrich.md
+      - Ch7: 工作流与FAQ: course/ch07-workflow.md
   - Contributing: contributing.md
   - Changelog: changelog.md
 
