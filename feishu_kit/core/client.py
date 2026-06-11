@@ -236,6 +236,23 @@ class FeishuClient:
                 raise APIError(data["code"], data.get("msg", ""))
             return data
 
+    async def download(self, path: str, *, params: dict | None = None) -> bytes:
+        """Download binary content from Feishu (e.g. images, files).
+
+        Returns:
+            Raw bytes of the downloaded content.
+        """
+        await self._ensure_token()
+        headers = {"Authorization": f"Bearer {self._tenant_access_token}"}
+
+        client = await self._get_client()
+        resp = await client.request("GET", path, headers=headers, params=params)
+
+        if resp.status_code >= 400:
+            raise APIError(resp.status_code, f"Download failed: HTTP {resp.status_code}")
+
+        return resp.content
+
     async def close(self) -> None:
         """Close the persistent HTTP client and release connections."""
         if self._client and not self._client.is_closed:

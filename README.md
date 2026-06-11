@@ -11,7 +11,7 @@
 
 <p align="center">
   <strong>A modular, async-first Python toolkit for Feishu (Lark) Open Platform</strong><br>
-  7 API modules · CLI · FastAPI server · Markdown converter · Course-friendly
+  8 API modules · CLI · FastAPI server · Markdown converter · Wiki migration · Course-friendly
 </p>
 
 <p align="center">
@@ -48,6 +48,7 @@
 | :calendar: | **Calendar** | Events, calendars, free/busy query |
 | :white_check_mark: | **Task** | Tasks, task lists, members, comments |
 | :memo: | **md2feishu** | Markdown → Feishu DocX with one call |
+| :truck: | **Migrate** | Wiki node/tree copy with image, file, table, sheet support |
 
 Plus a :rocket: **CLI** (`feishu-kit` command) and an optional :globe_with_meridians: **FastAPI server** layer.
 

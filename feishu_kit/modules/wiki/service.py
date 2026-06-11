@@ -707,3 +707,49 @@ class WikiService:
             f"/docx/v1/documents/{obj_token}/blocks/{block_id}",
             json=update_body,
         )
+
+    # -- Media operations -----------------------------------------------
+
+    async def download_media(self, file_token: str) -> bytes:
+        """Download media/file binary data by file_token."""
+        return await self._client.download(
+            f"/drive/v1/medias/{file_token}/download"
+        )
+
+    async def download_image(self, file_token: str) -> bytes:
+        """Download image binary data (backward compat)."""
+        return await self.download_media(file_token)
+
+    async def upload_docx_image(
+        self, obj_token: str, file_name: str, file_data: bytes
+    ) -> str:
+        """Upload an image to a Feishu docx document, return file_token."""
+        return await self._upload_docx_media(
+            obj_token, file_name, file_data, parent_type="docx_image"
+        )
+
+    async def upload_docx_file(
+        self, obj_token: str, file_name: str, file_data: bytes
+    ) -> str:
+        """Upload a file (PDF etc.) to a Feishu docx document, return file_token."""
+        return await self._upload_docx_media(
+            obj_token, file_name, file_data, parent_type="docx_file"
+        )
+
+    async def _upload_docx_media(
+        self, obj_token: str, file_name: str, file_data: bytes,
+        parent_type: str = "docx_image",
+    ) -> str:
+        """Upload media to a Feishu docx document (internal)."""
+        resp = await self._client.upload(
+            "/drive/v1/medias/upload_all",
+            file_name=file_name,
+            file_data=file_data,
+            fields={
+                "file_name": file_name,
+                "parent_type": parent_type,
+                "parent_node": obj_token,
+                "size": str(len(file_data)),
+            },
+        )
+        return resp["data"]["file_token"]
