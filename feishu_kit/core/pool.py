@@ -60,3 +60,23 @@ class ClientPool:
         for name, client in self._clients.items():
             await client.close()
             logger.info("Closed bot client: %s", name)
+
+    @classmethod
+    def from_settings(cls, settings=None) -> "ClientPool":
+        """Create a pool populated from a Settings instance.
+
+        Args:
+            settings: A Settings instance. If None, creates one from env/.env.
+
+        Returns:
+            ClientPool with 'default' (and optionally 'bot2') clients.
+        """
+        if settings is None:
+            from feishu_kit.core.settings import Settings
+            settings = Settings()
+        pool = cls()
+        if settings.feishu_app_id:
+            pool.add("default", settings.feishu_app_id, settings.feishu_app_secret)
+        if settings.feishu_bot2_app_id:
+            pool.add("bot2", settings.feishu_bot2_app_id, settings.feishu_bot2_app_secret)
+        return pool

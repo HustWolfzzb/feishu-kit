@@ -37,6 +37,25 @@ class ModuleRegistry:
                 names.append(item.name)
         return names
 
+    def discover_by_fqn(self, prefix: str = "server.routers") -> list[str]:
+        """Discover modules by trying to import submodules of *prefix*."""
+        import pkgutil
+
+        try:
+            pkg = importlib.import_module(prefix)
+        except ImportError:
+            logger.warning("Cannot import %s for module discovery", prefix)
+            return []
+
+        names = []
+        pkg_path = getattr(pkg, "__path__", None)
+        if pkg_path is None:
+            return []
+        for _finder, name, is_pkg in pkgutil.iter_modules(pkg_path):
+            if not name.startswith("_"):
+                names.append(name)
+        return names
+
     def load(self, name: str, module_fqn: str | None = None) -> BaseModule:
         """Import module, find BaseModule subclass, instantiate and register."""
         fqn = module_fqn or f"modules.{name}"
@@ -80,6 +99,8 @@ class ModuleRegistry:
     ) -> None:
         """Discover, filter, load, and mount all modules."""
         discovered = self.discover(modules_dir)
+        if not discovered:
+            discovered = self.discover_by_fqn(module_fqn_prefix)
         to_load = discovered if not enabled else [n for n in discovered if n in enabled]
         for name in to_load:
             fqn = f"{module_fqn_prefix}.{name}"
